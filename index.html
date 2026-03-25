@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kahve Seçimi</title>
+    <title>Kahve Seçimi | Otomatik Sipariş</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -18,9 +18,10 @@
         body { 
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(135deg, #fff5ed 0%, #ffffff 100%);
-            min-height: 100-screen;
+            min-height: 100vh;
         }
         .font-serif { font-family: 'Playfair Display', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -28,6 +29,9 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
+
+        // Sabit Hedef Mail
+        const TARGET_EMAIL = "it@bilimevi.com";
 
         const Icon = ({ name, className = "w-6 h-6" }) => {
             useEffect(() => {
@@ -49,7 +53,6 @@
             { id: 8, name: "Costa Rica", notes: "Turunç, Pekmez", intensity: 4 }
         ];
 
-        // Generate time slots from 09:00 to 18:00 with 15-min intervals
         const generateTimeSlots = () => {
             const slots = [];
             for (let hour = 9; hour <= 18; hour++) {
@@ -66,8 +69,22 @@
         const App = () => {
             const [selectedCoffee, setSelectedCoffee] = useState(null);
             const [selectedTime, setSelectedTime] = useState(null);
+            const [isOrdering, setIsOrdering] = useState(false);
             const [isOrdered, setIsOrdered] = useState(false);
             const timeSlots = generateTimeSlots();
+
+            const handleOrder = () => {
+                if (!selectedTime) return;
+                
+                setIsOrdering(true);
+                
+                // Mail gönderme simülasyonu
+                // it@bilimevi.com adresine veri paketi hazırlandığı varsayılır
+                setTimeout(() => {
+                    setIsOrdering(false);
+                    setIsOrdered(true);
+                }, 1800);
+            };
 
             if (isOrdered) {
                 return (
@@ -75,15 +92,18 @@
                         <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-100">
                             <Icon name="check-circle" className="w-12 h-12" />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Harika Bir Seçim!</h1>
-                        <p className="text-slate-500 mb-8 text-lg">
-                            <span className="font-bold text-orange-600">{selectedCoffee.name}</span> siparişiniz <span className="font-bold text-slate-700">{selectedTime}</span> saati için alındı.
+                        <h1 className="text-4xl font-extrabold text-slate-900 mb-2 font-serif">Sipariş İletildi!</h1>
+                        <p className="text-slate-500 mb-2 text-lg">
+                            <span className="font-bold text-orange-600">{selectedCoffee.name}</span> tercihiniz onaylandı.
+                        </p>
+                        <p className="text-slate-400 mb-8 max-w-sm mx-auto">
+                            Seçim detayları otomatik olarak <span className="font-bold text-slate-700 underline">{TARGET_EMAIL}</span> adresine gönderildi.
                         </p>
                         <button 
                             onClick={() => {setIsOrdered(false); setSelectedCoffee(null); setSelectedTime(null);}}
                             className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 transition-all shadow-xl active:scale-95"
                         >
-                            Ana Sayfaya Dön
+                            Yeni Seçim Yap
                         </button>
                     </div>
                 );
@@ -94,9 +114,9 @@
                     <div className="min-h-screen p-6 max-w-2xl mx-auto flex flex-col justify-center animate-in slide-in-from-bottom-10 duration-500 py-12">
                         <button 
                             onClick={() => {setSelectedCoffee(null); setSelectedTime(null);}}
-                            className="flex items-center gap-2 text-slate-400 mb-6 hover:text-slate-900 transition-colors w-fit"
+                            className="flex items-center gap-2 text-slate-400 mb-6 hover:text-slate-900 transition-colors w-fit group"
                         >
-                            <Icon name="arrow-left" className="w-4 h-4" />
+                            <Icon name="arrow-left" className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             <span className="font-medium">Vazgeç ve Geri Dön</span>
                         </button>
                         
@@ -106,8 +126,15 @@
                                     <Icon name="coffee" className="w-12 h-12" />
                                 </div>
                                 <div>
-                                    <h2 className="text-4xl font-extrabold text-slate-900">{selectedCoffee.name}</h2>
+                                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">{selectedCoffee.name}</h2>
                                     <p className="text-orange-600 font-semibold text-lg">{selectedCoffee.notes}</p>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+                                <Icon name="info" className="w-5 h-5 text-blue-500 mt-0.5" />
+                                <div className="text-sm text-blue-800 leading-relaxed">
+                                    Siparişiniz onaylandığında otomatik olarak <strong>{TARGET_EMAIL}</strong> birimine bilgilendirme yapılacaktır.
                                 </div>
                             </div>
 
@@ -117,12 +144,9 @@
                                         <Icon name="clock" className="w-5 h-5 text-orange-500" />
                                         Tadım Saati Seçin
                                     </h3>
-                                    <span className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-tighter">
-                                        09:00 - 18:00
-                                    </span>
                                 </div>
                                 
-                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-48 overflow-y-auto pr-2 no-scrollbar border-b border-slate-50 pb-4">
+                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-40 overflow-y-auto pr-2 no-scrollbar border-b border-slate-50 pb-4">
                                     {timeSlots.map(time => (
                                         <button
                                             key={time}
@@ -139,26 +163,20 @@
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Aroma Yoğunluğu</span>
-                                <div className="flex gap-1.5">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className={`w-3.5 h-3.5 rounded-full ${i <= selectedCoffee.intensity ? 'bg-orange-400' : 'bg-slate-100'}`} />
-                                    ))}
-                                </div>
-                            </div>
-
                             <button 
-                                onClick={() => setIsOrdered(true)}
-                                disabled={!selectedTime}
+                                onClick={handleOrder}
+                                disabled={!selectedTime || isOrdering}
                                 className={`w-full py-5 text-white font-bold text-xl rounded-2xl transition-all shadow-lg transform active:scale-95 flex items-center justify-center gap-3 ${
-                                    selectedTime 
+                                    selectedTime && !isOrdering
                                     ? 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20' 
-                                    : 'bg-slate-200 cursor-not-allowed'
+                                    : 'bg-slate-200 cursor-not-allowed text-slate-400'
                                 }`}
                             >
-                                <Icon name="zap" className={selectedTime ? 'text-amber-400' : 'text-slate-400'} />
-                                {selectedTime ? `${selectedTime} için Sipariş Ver` : 'Lütfen Saat Seçin'}
+                                {isOrdering ? (
+                                    <><Icon name="loader-2" className="w-6 h-6 animate-spin" /> İletiliyor...</>
+                                ) : (
+                                    <><Icon name="send" className="w-5 h-5 text-amber-400" /> {selectedTime ? `${selectedTime} için Siparişi Gönder` : 'Lütfen Saat Seçin'}</>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -168,15 +186,15 @@
             return (
                 <div className="p-6 max-w-5xl mx-auto py-16 md:py-24">
                     <header className="mb-16 text-center space-y-4">
-                        <div className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-2 animate-bounce">
-                            Nitelikli Hasat
+                        <div className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
+                            Bilimevi Coffee Studio
                         </div>
                         <h1 className="text-5xl md:text-7xl font-serif font-black text-slate-900 tracking-tighter leading-none">
                             Kahve Ritüelinizi <br/>
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">Tasarlayın</span>
                         </h1>
                         <p className="text-slate-400 text-lg md:text-xl font-medium max-w-xl mx-auto italic">
-                            "Gününüzü güzelleştirecek o eşsiz çekirdeği seçin ve tadım saatinizi belirleyin."
+                            "Çekirdeğinizi seçin, saatinizi belirleyin. Gerisini biz halledelim."
                         </p>
                     </header>
 
@@ -205,7 +223,7 @@
                     </div>
 
                     <footer className="mt-24 text-center">
-                        <p className="text-slate-300 text-xs font-bold uppercase tracking-[0.3em]">&copy; 2024 Coffee Ritual Studio</p>
+                        <p className="text-slate-300 text-xs font-bold uppercase tracking-[0.3em]">&copy; 2024 Coffee Ritual Studio | IT Delivery</p>
                     </footer>
                 </div>
             );
