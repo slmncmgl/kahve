@@ -1,0 +1,464 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  Coffee, Globe, Droplets, Search, ChevronRight, 
+  Info, Heart, X, Filter, BarChart3, 
+  Zap, Star, ShoppingBag, ArrowRight, CheckCircle2, Loader2, Mail
+} from 'lucide-react';
+
+const coffeeData = [
+  {
+    id: 1,
+    name: "Guatemala Arabica",
+    origin: "Latin Amerika",
+    roast: "Açık",
+    type: "Arabica",
+    notes: ["Fındık", "Çikolata", "Üzüm", "Akçaağaç", "Kavun"],
+    description: "Yumuşak içimli, tatlı notaların ön planda olduğu dengeli bir tercih.",
+    intensity: 2,
+    profile: "Tatlı & Dengeli",
+    tags: ["Yumuşak", "Çikolatalı"]
+  },
+  {
+    id: 2,
+    name: "Nicaragua SHB EP AAA",
+    origin: "Latin Amerika",
+    roast: "City Plus",
+    type: "Nicaragua Arabica",
+    notes: ["Tatlı", "Dengeli", "Fındık", "Badem"],
+    description: "Yumuşak ama gövdeli, fındıksı aromaların hakim olduğu dengeli bir kupa.",
+    intensity: 3,
+    profile: "Nutty",
+    tags: ["Yumuşak", "Fındıksı"]
+  },
+  {
+    id: 3,
+    name: "Ethiopia Yirgacheffe Idido",
+    origin: "Afrika",
+    roast: "Full City Plus",
+    type: "Arabica Specialty Gr2",
+    notes: ["Floral", "Turunçgil", "Orman Meyveleri", "Fındık"],
+    description: "Yıkanmış işlem, yoğun çiçeksi ve meyvemsi aromalar barındırır.",
+    intensity: 4,
+    profile: "Floral & Meyvemsi",
+    tags: ["Asidik", "Meyvemsi"]
+  },
+  {
+    id: 4,
+    name: "Panama Santa Clara",
+    origin: "Latin Amerika",
+    roast: "Standart",
+    type: "Arabica",
+    notes: ["Badem", "Yemiş", "Yaban Mersini", "Frenk Üzümü"],
+    description: "Yumuşak içimli, kompleks meyve notalarıyla zenginleşmiş bir profil.",
+    intensity: 2,
+    profile: "Meyvemsi",
+    tags: ["Yumuşak", "Meyvemsi"]
+  },
+  {
+    id: 5,
+    name: "Yirgacheffe Gr1 Natural",
+    origin: "Afrika",
+    roast: "Açık",
+    type: "Arabica Gr1 Natural",
+    notes: ["Orman Meyveleri", "Siyah Üzüm", "Kayısı", "Turunç", "Elma"],
+    description: "Doğal işlem sayesinde meyve şekerlerinin en yüksek seviyede hissedildiği gövdeli bir kahve.",
+    intensity: 3,
+    profile: "Kompleks Meyve",
+    tags: ["Asidik", "Meyvemsi"]
+  },
+  {
+    id: 6,
+    name: "Honduras SHP EP Organik",
+    origin: "Latin Amerika",
+    roast: "Harman",
+    type: "Organik Arabica",
+    notes: ["Kakao", "Tereyağ", "Fındık", "Pekmez", "Turunçgil"],
+    description: "Dünyanın en beğenilen bölgelerinden, tam ve yumuşak gövdeli, zengin aroma.",
+    intensity: 3,
+    profile: "Zengin & Gövdeli",
+    tags: ["Organik", "Çikolatalı"]
+  },
+  {
+    id: 7,
+    name: "Brazil Yellow Bourbon",
+    origin: "Latin Amerika",
+    roast: "City Plus",
+    type: "Brezilya Arabica (84+ Skor)",
+    notes: ["Kırmızı Meyve", "Üzüm", "Çikolata", "Tatlı"],
+    description: "Karbon nötr sertifikalı, içim sonrası memnun edici tat bırakan nitelikli seçim.",
+    intensity: 3,
+    profile: "Dengeli Tatlı",
+    tags: ["Çikolatalı", "Meyvemsi"]
+  },
+  {
+    id: 8,
+    name: "Sumatra Gayo Gr1",
+    origin: "Asya-Okyanusya",
+    roast: "Koyu",
+    type: "Arabica Gr1",
+    notes: ["İsli", "Topraksı", "Baharatlı", "Çikolata"],
+    description: "Sert içim, bölgeye özgü karakteristik topraksı ve isli aromalar.",
+    intensity: 5,
+    profile: "İsli & Topraksı",
+    tags: ["Sert", "Baharatlı"]
+  },
+  {
+    id: 9,
+    name: "Costa Rica Tarrazu",
+    origin: "Latin Amerika",
+    roast: "Sert",
+    type: "Arabica Rezerv",
+    notes: ["Turunçgil", "Pekmez", "Kahverengi Şeker", "Kokulu Notlar"],
+    description: "Sert içim tercih edenler için yüksek aromalı, tatlı bitişli bir rezerv kahve.",
+    intensity: 4,
+    profile: "Aromatik Sert",
+    tags: ["Sert", "Tatlı"]
+  },
+  {
+    id: 10,
+    name: "Tanzania Arabica AA Washed",
+    origin: "Afrika",
+    roast: "Full City",
+    type: "Arabica AA",
+    notes: ["Meyveli", "Yoğun Aromatik", "Tam Gövdeli"],
+    description: "Yüksek asidite ve yoğun gövde dengesiyle güçlü bir Afrika karakteri.",
+    intensity: 4,
+    profile: "Canlı & Gövdeli",
+    tags: ["Asidik", "Sert"]
+  },
+  {
+    id: 11,
+    name: "Mexico SHG EP Chiapas",
+    origin: "Latin Amerika",
+    roast: "City Plus",
+    type: "Meksika Arabica",
+    notes: ["Tatlı", "Meyve", "Fındık"],
+    description: "Berrak lezzet, bitişte kendini hissettiren asidite ve yüksek skor.",
+    intensity: 2,
+    profile: "Berrak & Tatlı",
+    tags: ["Yumuşak", "Fındıksı"]
+  },
+  {
+    id: 12,
+    name: "Brazil Capadocia Arara",
+    origin: "Latin Amerika",
+    roast: "City Plus",
+    type: "Red Bourbon (83+ Skor)",
+    notes: ["Fındık", "Badem", "Kırmızı Meyve", "İpeksi Gövde"],
+    description: "Düşük asidite, temiz kupa ve uzun süreli kalıcı tat.",
+    intensity: 2,
+    profile: "İpeksi & Düşük Asidite",
+    tags: ["Yumuşak", "Fındıksı"]
+  },
+  {
+    id: 13,
+    name: "Rwanda Arabica (JBM)",
+    origin: "Afrika",
+    roast: "City Plus",
+    type: "Typica JBM Cultivar",
+    notes: ["Yoğun Yemiş", "Dumanlı", "Fındık", "Rafine Tatlılık"],
+    description: "Jamaika Blue Mountain tohum kökenli, katmanlı ve düşük asiditeli özel içim.",
+    intensity: 4,
+    profile: "Rafine & Dumanlı",
+    tags: ["Sert", "Fındıksı"]
+  }
+];
+
+const App = () => {
+  const [activeRegion, setActiveRegion] = useState('Hepsi');
+  const [activeTag, setActiveTag] = useState('Hepsi');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCoffee, setSelectedCoffee] = useState(null);
+  const [favorites, setFavorites] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+
+  const regions = ['Hepsi', 'Afrika', 'Latin Amerika', 'Asya-Okyanusya'];
+  const tags = ['Hepsi', 'Meyvemsi', 'Çikolatalı', 'Fındıksı', 'Asidik', 'Sert', 'Yumuşak'];
+
+  const filteredCoffees = useMemo(() => {
+    return coffeeData.filter(item => {
+      const matchesRegion = activeRegion === 'Hepsi' || item.origin === activeRegion;
+      const matchesTag = activeTag === 'Hepsi' || item.tags.includes(activeTag);
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           item.notes.some(n => n.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchesRegion && matchesTag && matchesSearch;
+    });
+  }, [activeRegion, activeTag, searchTerm]);
+
+  const toggleFavorite = (e, coffeeId) => {
+    e.stopPropagation();
+    setFavorites(prev => 
+      prev.includes(coffeeId) ? prev.filter(id => id !== coffeeId) : [...prev, coffeeId]
+    );
+  };
+
+  const handlePlaceOrder = () => {
+    setIsOrdering(true);
+    // Mail gönderiliyormuş gibi bir gecikme ekliyoruz
+    setTimeout(() => {
+      setIsOrdering(false);
+      setOrderSuccess(true);
+      setFavorites([]); // Siparişten sonra listeyi temizle
+    }, 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f0a09] text-[#e5dcd3] font-sans overflow-x-hidden selection:bg-[#c49b6c]">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 h-20 bg-[#0f0a09]/80 backdrop-blur-xl border-b border-[#2a201c] z-50 flex items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-[#c49b6c] to-[#8d7b68] p-2 rounded-xl shadow-lg shadow-[#c49b6c]/20">
+            <Coffee className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-xl font-serif font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e5dcd3] to-[#8d7b68]">
+            BEAN SELECT
+          </span>
+        </div>
+
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[#8d7b68]">
+          {regions.map(r => (
+            <button 
+              key={r}
+              onClick={() => setActiveRegion(r)}
+              className={`hover:text-[#c49b6c] transition-colors ${activeRegion === r ? 'text-[#c49b6c]' : ''}`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setShowFavorites(true)}
+            className="relative p-2 hover:bg-[#2a201c] rounded-full transition-colors group"
+          >
+            <Heart className={`w-6 h-6 ${favorites.length > 0 ? 'fill-[#c49b6c] text-[#c49b6c]' : 'text-[#8d7b68]'}`} />
+            {favorites.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#c49b6c] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                {favorites.length}
+              </span>
+            )}
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Container */}
+      <main className="pt-28 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
+        {/* Search & Profile Filters */}
+        <div className="mb-12 space-y-8 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="text-center space-y-2">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-white tracking-tight">Mükemmel Çekirdeği Keşfet</h2>
+            <p className="text-[#8d7b68] text-lg">Damak tadına göre filtrelenmiş nitelikli seçki</p>
+          </div>
+
+          <div className="max-w-2xl mx-auto relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8d7b68] group-focus-within:text-[#c49b6c] transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Tat notu, bölge veya karakter ara..." 
+              className="w-full bg-[#1a1412] border border-[#2a201c] rounded-2xl py-5 pl-14 pr-6 text-lg focus:outline-none focus:ring-2 focus:ring-[#c49b6c]/30 focus:border-[#c49b6c]/50 transition-all shadow-2xl"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {tags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag)}
+                className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                  activeTag === tag 
+                  ? 'bg-[#c49b6c] text-white border-[#c49b6c] shadow-lg shadow-[#c49b6c]/20 scale-105' 
+                  : 'bg-[#1a1412] text-[#8d7b68] border-[#2a201c] hover:border-[#c49b6c]/30'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Results Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredCoffees.map((coffee) => (
+            <div 
+              key={coffee.id}
+              onClick={() => setSelectedCoffee(coffee)}
+              className="group relative bg-[#1a1412] rounded-[2rem] border border-[#2a201c] p-6 cursor-pointer hover:border-[#c49b6c]/40 transition-all duration-500 hover:shadow-2xl hover:shadow-[#c49b6c]/5 flex flex-col"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#c49b6c]">
+                    <MapPin className="w-3 h-3" />
+                    {coffee.origin}
+                  </div>
+                  <h3 className="text-xl font-bold text-white group-hover:text-[#c49b6c] transition-colors leading-tight">
+                    {coffee.name}
+                  </h3>
+                </div>
+                <button 
+                  onClick={(e) => toggleFavorite(e, coffee.id)}
+                  className="p-2 bg-[#2a201c] rounded-xl hover:bg-[#3c2a21] transition-colors"
+                >
+                  <Heart className={`w-5 h-5 ${favorites.includes(coffee.id) ? 'fill-[#c49b6c] text-[#c49b6c]' : 'text-[#8d7b68]'}`} />
+                </button>
+              </div>
+
+              <div className="mb-6 flex items-center gap-2 text-xs font-medium text-[#8d7b68] bg-[#0f0a09] w-fit px-3 py-1.5 rounded-lg border border-[#2a201c]">
+                <Zap className="w-3 h-3 text-[#c49b6c]" />
+                {coffee.profile}
+              </div>
+
+              <div className="mt-auto space-y-4">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-tighter text-[#8d7b68]">
+                  <span>Karakter</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className={`w-3 h-1 rounded-full ${i <= coffee.intensity ? 'bg-[#c49b6c]' : 'bg-[#2a201c]'}`} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {coffee.notes.slice(0, 3).map(n => (
+                    <span key={n} className="text-[10px] bg-[#2a201c] px-2 py-1 rounded-md text-[#e5dcd3] border border-transparent group-hover:border-[#c49b6c]/20 transition-colors">
+                      {n}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="absolute bottom-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-300">
+                <ArrowRight className="w-5 h-5 text-[#c49b6c]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Detail Modal */}
+      {selectedCoffee && (
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setSelectedCoffee(null)}></div>
+          <div className="relative w-full max-w-3xl bg-[#0f0a09] border-t md:border border-[#2a201c] rounded-t-[2.5rem] md:rounded-[3rem] overflow-hidden animate-in slide-in-from-bottom-10 duration-500 shadow-2xl">
+            <div className="h-40 bg-gradient-to-br from-[#1a1412] to-[#2a201c] relative flex items-center justify-center overflow-hidden">
+               <Coffee className="w-20 h-20 text-[#c49b6c]/20" />
+               <button onClick={() => setSelectedCoffee(null)} className="absolute top-6 right-6 p-3 bg-black/40 rounded-full backdrop-blur-md">
+                  <X className="w-6 h-6 text-white" />
+                </button>
+            </div>
+            <div className="p-8 md:p-12 -mt-10 bg-[#0f0a09] rounded-t-[2.5rem] relative">
+              <h2 className="text-4xl font-serif font-bold text-white mb-6 leading-tight">{selectedCoffee.name}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-[#8d7b68]">
+                <div className="space-y-6">
+                  <p className="text-lg italic leading-relaxed">"{selectedCoffee.description}"</p>
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-[#c49b6c]">Tadım Notları</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCoffee.notes.map(n => <span key={n} className="bg-[#1a1412] px-3 py-1.5 rounded-lg border border-[#2a201c] text-sm">{n}</span>)}
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <div className="p-6 bg-[#1a1412] rounded-3xl border border-[#2a201c] space-y-4">
+                    <div className="flex justify-between"><span>Gövde</span><span>{selectedCoffee.intensity}/5</span></div>
+                    <div className="flex justify-between"><span>Tür</span><span>{selectedCoffee.type}</span></div>
+                  </div>
+                  <button 
+                    onClick={() => {toggleFavorite({stopPropagation: () => {}}, selectedCoffee.id); setSelectedCoffee(null)}}
+                    className="w-full py-4 bg-[#c49b6c] text-black font-black uppercase rounded-2xl flex items-center justify-center gap-2"
+                  >
+                    {favorites.includes(selectedCoffee.id) ? <X className="w-5 h-5" /> : <Heart className="w-5 h-5" />}
+                    {favorites.includes(selectedCoffee.id) ? 'Listeden Çıkar' : 'Seçimlerime Ekle'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Favorites Sidebar */}
+      {showFavorites && (
+        <div className="fixed inset-0 z-[200] flex justify-end animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFavorites(false)}></div>
+          <div className="relative w-full max-w-md bg-[#0f0a09] border-l border-[#2a201c] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
+            <div className="p-8 border-b border-[#2a201c] flex items-center justify-between">
+              <div className="flex items-center gap-3 text-[#c49b6c]">
+                <ShoppingBag className="w-6 h-6" />
+                <h3 className="text-2xl font-serif font-bold text-white">Seçimlerin</h3>
+              </div>
+              <button onClick={() => setShowFavorites(false)} className="p-2 text-[#8d7b68]"><X className="w-6 h-6" /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {favorites.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center opacity-40 px-10 text-center">
+                   <Heart className="w-16 h-16 mb-4" />
+                   <p>Listeniz henüz boş.</p>
+                </div>
+              ) : (
+                coffeeData.filter(c => favorites.includes(c.id)).map(coffee => (
+                  <div key={coffee.id} className="flex gap-4 p-4 bg-[#1a1412] rounded-2xl border border-[#2a201c]">
+                    <div className="flex-1">
+                      <h4 className="font-bold text-white">{coffee.name}</h4>
+                      <p className="text-xs text-[#8d7b68]">{coffee.origin}</p>
+                    </div>
+                    <button onClick={(e) => toggleFavorite(e, coffee.id)} className="text-[#8d7b68]"><X className="w-5 h-5" /></button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {favorites.length > 0 && (
+              <div className="p-8 border-t border-[#2a201c] bg-[#1a1412]/50">
+                <button 
+                  onClick={handlePlaceOrder}
+                  disabled={isOrdering}
+                  className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#e5dcd3] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {isOrdering ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Sipariş Gönderiliyor...</>
+                  ) : (
+                    <><Mail className="w-5 h-5" /> Tadım Planla</>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Success Popup */}
+      {orderSuccess && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setOrderSuccess(false)}></div>
+          <div className="relative bg-[#1a1412] border border-[#c49b6c]/30 p-10 rounded-[3rem] text-center max-w-md w-full animate-in zoom-in-95 duration-500 shadow-2xl shadow-[#c49b6c]/10">
+            <div className="w-24 h-24 bg-[#c49b6c]/10 rounded-full flex items-center justify-center mx-auto mb-8">
+              <CheckCircle2 className="w-12 h-12 text-[#c49b6c]" />
+            </div>
+            <h2 className="text-3xl font-serif font-bold text-white mb-4 italic">Siparişiniz Alınmıştır!</h2>
+            <p className="text-[#8d7b68] leading-relaxed mb-10">
+              Seçmiş olduğunuz eşsiz kahve çekirdeklerinin tadım detayları tarafınıza bir e-posta ile iletildi. Şimdiden afiyet olsun!
+            </p>
+            <button 
+              onClick={() => {setOrderSuccess(false); setShowFavorites(false)}}
+              className="w-full py-5 bg-[#c49b6c] text-black font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-[#c49b6c]/20"
+            >
+              Harika, Teşekkürler!
+            </button>
+          </div>
+        </div>
+      )}
+
+      <footer className="py-20 px-8 border-t border-[#2a201c] text-center space-y-4">
+         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#3c2a21]">BEAN SELECT &bull; 2024</p>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
