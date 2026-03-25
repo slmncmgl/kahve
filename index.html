@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- React & Babel CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -17,8 +17,10 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #fcfcfc;
+            background: linear-gradient(135deg, #fff5ed 0%, #ffffff 100%);
+            min-height: 100-screen;
         }
+        .font-serif { font-family: 'Playfair Display', serif; }
     </style>
 </head>
 <body>
@@ -47,21 +49,39 @@
             { id: 8, name: "Costa Rica", notes: "Turunç, Pekmez", intensity: 4 }
         ];
 
+        // Generate time slots from 09:00 to 18:00 with 15-min intervals
+        const generateTimeSlots = () => {
+            const slots = [];
+            for (let hour = 9; hour <= 18; hour++) {
+                for (let min = 0; min < 60; min += 15) {
+                    if (hour === 18 && min > 0) break;
+                    const h = hour.toString().padStart(2, '0');
+                    const m = min.toString().padStart(2, '0');
+                    slots.push(`${h}:${m}`);
+                }
+            }
+            return slots;
+        };
+
         const App = () => {
             const [selectedCoffee, setSelectedCoffee] = useState(null);
+            const [selectedTime, setSelectedTime] = useState(null);
             const [isOrdered, setIsOrdered] = useState(false);
+            const timeSlots = generateTimeSlots();
 
             if (isOrdered) {
                 return (
                     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-500">
-                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-                            <Icon name="check" className="w-10 h-10" />
+                        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-100">
+                            <Icon name="check-circle" className="w-12 h-12" />
                         </div>
-                        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Siparişiniz Alındı!</h1>
-                        <p className="text-slate-500 mb-8">En kısa sürede hazırlamaya başlıyoruz.</p>
+                        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Harika Bir Seçim!</h1>
+                        <p className="text-slate-500 mb-8 text-lg">
+                            <span className="font-bold text-orange-600">{selectedCoffee.name}</span> siparişiniz <span className="font-bold text-slate-700">{selectedTime}</span> saati için alındı.
+                        </p>
                         <button 
-                            onClick={() => {setIsOrdered(false); setSelectedCoffee(null);}}
-                            className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 transition-colors"
+                            onClick={() => {setIsOrdered(false); setSelectedCoffee(null); setSelectedTime(null);}}
+                            className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 transition-all shadow-xl active:scale-95"
                         >
                             Ana Sayfaya Dön
                         </button>
@@ -71,39 +91,74 @@
 
             if (selectedCoffee) {
                 return (
-                    <div className="min-h-screen p-6 max-w-lg mx-auto flex flex-col justify-center animate-in slide-in-from-bottom-10 duration-500">
+                    <div className="min-h-screen p-6 max-w-2xl mx-auto flex flex-col justify-center animate-in slide-in-from-bottom-10 duration-500 py-12">
                         <button 
-                            onClick={() => setSelectedCoffee(null)}
-                            className="flex items-center gap-2 text-slate-400 mb-8 hover:text-slate-900 transition-colors"
+                            onClick={() => {setSelectedCoffee(null); setSelectedTime(null);}}
+                            className="flex items-center gap-2 text-slate-400 mb-6 hover:text-slate-900 transition-colors w-fit"
                         >
                             <Icon name="arrow-left" className="w-4 h-4" />
-                            <span>Geri Dön</span>
+                            <span className="font-medium">Vazgeç ve Geri Dön</span>
                         </button>
                         
-                        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6">
-                            <div className="w-20 h-20 bg-orange-50 text-orange-600 rounded-3xl flex items-center justify-center">
-                                <Icon name="coffee" className="w-10 h-10" />
-                            </div>
-                            
-                            <div>
-                                <h2 className="text-4xl font-extrabold text-slate-900">{selectedCoffee.name}</h2>
-                                <p className="text-slate-500 mt-2 text-lg">{selectedCoffee.notes}</p>
+                        <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-2xl shadow-orange-900/5 border border-slate-100 space-y-8">
+                            <div className="flex items-center gap-6">
+                                <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-amber-500 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-orange-200">
+                                    <Icon name="coffee" className="w-12 h-12" />
+                                </div>
+                                <div>
+                                    <h2 className="text-4xl font-extrabold text-slate-900">{selectedCoffee.name}</h2>
+                                    <p className="text-orange-600 font-semibold text-lg">{selectedCoffee.notes}</p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-4 py-4 border-y border-slate-50">
-                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Yoğunluk</span>
-                                <div className="flex gap-1">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <Icon name="clock" className="w-5 h-5 text-orange-500" />
+                                        Tadım Saati Seçin
+                                    </h3>
+                                    <span className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-tighter">
+                                        09:00 - 18:00
+                                    </span>
+                                </div>
+                                
+                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-48 overflow-y-auto pr-2 no-scrollbar border-b border-slate-50 pb-4">
+                                    {timeSlots.map(time => (
+                                        <button
+                                            key={time}
+                                            onClick={() => setSelectedTime(time)}
+                                            className={`py-2 rounded-xl text-sm font-bold transition-all border ${
+                                                selectedTime === time 
+                                                ? 'bg-orange-500 text-white border-orange-500 shadow-md scale-105' 
+                                                : 'bg-white text-slate-500 border-slate-100 hover:border-orange-200'
+                                            }`}
+                                        >
+                                            {time}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between py-2">
+                                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Aroma Yoğunluğu</span>
+                                <div className="flex gap-1.5">
                                     {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className={`w-3 h-3 rounded-full ${i <= selectedCoffee.intensity ? 'bg-orange-400' : 'bg-slate-100'}`} />
+                                        <div key={i} className={`w-3.5 h-3.5 rounded-full ${i <= selectedCoffee.intensity ? 'bg-orange-400' : 'bg-slate-100'}`} />
                                     ))}
                                 </div>
                             </div>
 
                             <button 
                                 onClick={() => setIsOrdered(true)}
-                                className="w-full py-5 bg-orange-600 text-white font-bold text-xl rounded-2xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 transform active:scale-95"
+                                disabled={!selectedTime}
+                                className={`w-full py-5 text-white font-bold text-xl rounded-2xl transition-all shadow-lg transform active:scale-95 flex items-center justify-center gap-3 ${
+                                    selectedTime 
+                                    ? 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20' 
+                                    : 'bg-slate-200 cursor-not-allowed'
+                                }`}
                             >
-                                Sipariş Ver
+                                <Icon name="zap" className={selectedTime ? 'text-amber-400' : 'text-slate-400'} />
+                                {selectedTime ? `${selectedTime} için Sipariş Ver` : 'Lütfen Saat Seçin'}
                             </button>
                         </div>
                     </div>
@@ -111,32 +166,47 @@
             }
 
             return (
-                <div className="p-6 max-w-4xl mx-auto py-20">
-                    <header className="mb-12 text-center">
-                        <h1 className="text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Kahve tercihinizi yapın</h1>
-                        <p className="text-slate-400 text-lg">Gününüzü güzelleştirecek çekirdeği seçin.</p>
+                <div className="p-6 max-w-5xl mx-auto py-16 md:py-24">
+                    <header className="mb-16 text-center space-y-4">
+                        <div className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-2 animate-bounce">
+                            Nitelikli Hasat
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-serif font-black text-slate-900 tracking-tighter leading-none">
+                            Kahve Ritüelinizi <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">Tasarlayın</span>
+                        </h1>
+                        <p className="text-slate-400 text-lg md:text-xl font-medium max-w-xl mx-auto italic">
+                            "Gününüzü güzelleştirecek o eşsiz çekirdeği seçin ve tadım saatinizi belirleyin."
+                        </p>
                     </header>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                         {coffeeData.map(coffee => (
                             <div 
                                 key={coffee.id}
                                 onClick={() => setSelectedCoffee(coffee)}
-                                className="bg-white p-6 rounded-3xl border border-slate-100 hover:border-orange-200 hover:shadow-xl hover:shadow-orange-900/5 transition-all cursor-pointer flex items-center justify-between group"
+                                className="bg-white p-8 rounded-[35px] border border-slate-100 hover:border-orange-200 hover:shadow-2xl hover:shadow-orange-900/5 transition-all cursor-pointer flex items-center justify-between group relative overflow-hidden"
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-                                        <Icon name="coffee" />
+                                <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-0"></div>
+                                <div className="flex items-center gap-6 relative z-10">
+                                    <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-[22px] flex items-center justify-center group-hover:bg-orange-50 group-hover:text-orange-500 transition-all group-hover:rotate-6 shadow-sm">
+                                        <Icon name="coffee" className="w-8 h-8" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-xl text-slate-900">{coffee.name}</h3>
-                                        <p className="text-sm text-slate-400">{coffee.notes}</p>
+                                        <h3 className="font-extrabold text-2xl text-slate-900 group-hover:text-orange-600 transition-colors tracking-tight">{coffee.name}</h3>
+                                        <p className="text-slate-400 font-medium group-hover:text-slate-500">{coffee.notes}</p>
                                     </div>
                                 </div>
-                                <Icon name="chevron-right" className="w-5 h-5 text-slate-200 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+                                <div className="w-12 h-12 rounded-full border border-slate-50 flex items-center justify-center group-hover:bg-orange-600 group-hover:border-orange-600 transition-all relative z-10 shadow-sm">
+                                    <Icon name="chevron-right" className="w-6 h-6 text-slate-300 group-hover:text-white transition-all group-hover:translate-x-0.5" />
+                                </div>
                             </div>
                         ))}
                     </div>
+
+                    <footer className="mt-24 text-center">
+                        <p className="text-slate-300 text-xs font-bold uppercase tracking-[0.3em]">&copy; 2024 Coffee Ritual Studio</p>
+                    </footer>
                 </div>
             );
         };
