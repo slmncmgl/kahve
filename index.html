@@ -79,7 +79,6 @@
                 setIsOrdering(true);
                 
                 // Mail gönderme simülasyonu
-                // it@bilimevi.com adresine veri paketi hazırlandığı varsayılır
                 setTimeout(() => {
                     setIsOrdering(false);
                     setIsOrdered(true);
@@ -123,7 +122,7 @@
                         <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-2xl shadow-orange-900/5 border border-slate-100 space-y-8">
                             <div className="flex items-center gap-6">
                                 <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-amber-500 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-orange-200">
-                                    <Icon name="coffee" className="w-12 h-12" />
+                                    <Icon name={selectedCoffee.id === 0 ? "help-circle" : "coffee"} className="w-12 h-12" />
                                 </div>
                                 <div>
                                     <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">{selectedCoffee.name}</h2>
@@ -199,6 +198,26 @@
                     </header>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                        {/* Kahvece Bilmiyorum Kartı */}
+                        <div 
+                            onClick={() => setSelectedCoffee({ id: 0, name: "Kahvece Bilmiyorum", notes: "Sizin için en uygununu biz seçelim", intensity: 3 })}
+                            className="bg-slate-900 p-8 rounded-[35px] border border-slate-800 hover:shadow-2xl hover:shadow-slate-900/20 transition-all cursor-pointer flex items-center justify-between group relative overflow-hidden"
+                        >
+                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-0"></div>
+                            <div className="flex items-center gap-6 relative z-10">
+                                <div className="w-16 h-16 bg-white/10 text-amber-400 rounded-[22px] flex items-center justify-center group-hover:bg-amber-400 group-hover:text-slate-900 transition-all group-hover:rotate-6 shadow-sm border border-white/5">
+                                    <Icon name="help-circle" className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <h3 className="font-extrabold text-2xl text-white tracking-tight">Kahvece Bilmiyorum</h3>
+                                    <p className="text-slate-400 font-medium italic">Sürpriz bir deneyim için tıklayın</p>
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-amber-400 group-hover:border-amber-400 transition-all relative z-10">
+                                <Icon name="sparkles" className="w-6 h-6 text-amber-400 group-hover:text-slate-900 transition-all" />
+                            </div>
+                        </div>
+
                         {coffeeData.map(coffee => (
                             <div 
                                 key={coffee.id}
