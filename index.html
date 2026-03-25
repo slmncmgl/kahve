@@ -32,6 +32,7 @@
 
         // --- ÖNEMLİ: BURAYI DEĞİŞTİR ---
         // Formspree'den aldığın ID'yi buraya yapıştır (Örn: "mqkrpvwz")
+        // Eğer bu ID "your-id" olarak kalırsa gönderim hatası alırsınız.
         const FORMSPREE_ID = "your-id"; 
         const TARGET_EMAIL = "it@bilimevi.com";
 
@@ -57,9 +58,19 @@
 
         const generateTimeSlots = () => {
             const slots = [];
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+
             for (let hour = 10; hour <= 17; hour++) {
                 for (let min = 0; min < 60; min += 15) {
                     if (hour === 17 && min > 0) break;
+                    
+                    // Geçmiş saatleri filtrele
+                    if (hour < currentHour || (hour === currentHour && min <= currentMin)) {
+                        continue;
+                    }
+
                     const h = hour.toString().padStart(2, '0');
                     const m = min.toString().padStart(2, '0');
                     slots.push(`${h}:${m}`);
@@ -74,12 +85,17 @@
             const [isOrdering, setIsOrdering] = useState(false);
             const [isOrdered, setIsOrdered] = useState(false);
             const [statusMessage, setStatusMessage] = useState("");
-            const timeSlots = generateTimeSlots();
+            const [timeSlots, setTimeSlots] = useState([]);
+
+            useEffect(() => {
+                setTimeSlots(generateTimeSlots());
+            }, [selectedCoffee]);
 
             const handleOrder = async () => {
                 if (!selectedTime) return;
                 
                 setIsOrdering(true);
+                setStatusMessage("");
                 
                 try {
                     // Formspree üzerinden gerçek mail gönderimi
@@ -97,12 +113,16 @@
                     if (response.ok) {
                         setIsOrdered(true);
                     } else {
-                        setStatusMessage("Gönderim hatası. Lütfen FORMSPREE_ID'yi kontrol edin.");
+                        // Eğer ID yanlışsa veya ayarlanmamışsa buraya düşer
+                        if (FORMSPREE_ID === "your-id") {
+                            setStatusMessage("Hata: FORMSPREE_ID henüz ayarlanmamış. Lütfen kodu düzenleyin.");
+                        } else {
+                            setStatusMessage("Gönderim hatası. Lütfen Formspree ayarlarınızı kontrol edin.");
+                        }
                     }
                 } catch (err) {
-                    // İnternet hatası vb. durumlar için fallback
                     console.error("Mail hatası:", err);
-                    setIsOrdered(true); // Demo amaçlı yine de onay ekranına geçiyoruz
+                    setStatusMessage("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
                 } finally {
                     setIsOrdering(false);
                 }
@@ -154,32 +174,42 @@
                                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                                     <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                                         <Icon name="clock" className="w-5 h-5 text-orange-500" />
-                                        Tadım Saati Seçin
+                                        Müsait Saat Seçin
                                     </h3>
                                 </div>
                                 
-                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-40 overflow-y-auto pr-2 no-scrollbar border-b border-slate-50 pb-4">
-                                    {timeSlots.map(time => (
-                                        <button
-                                            key={time}
-                                            onClick={() => setSelectedTime(time)}
-                                            className={`py-2 rounded-xl text-sm font-bold transition-all border ${
-                                                selectedTime === time 
-                                                ? 'bg-orange-500 text-white border-orange-500 shadow-md scale-105' 
-                                                : 'bg-white text-slate-500 border-slate-100 hover:border-orange-200'
-                                            }`}
-                                        >
-                                            {time}
-                                        </button>
-                                    ))}
-                                </div>
+                                {timeSlots.length > 0 ? (
+                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-40 overflow-y-auto pr-2 no-scrollbar border-b border-slate-50 pb-4">
+                                        {timeSlots.map(time => (
+                                            <button
+                                                key={time}
+                                                onClick={() => setSelectedTime(time)}
+                                                className={`py-2 rounded-xl text-sm font-bold transition-all border ${
+                                                    selectedTime === time 
+                                                    ? 'bg-orange-500 text-white border-orange-500 shadow-md scale-105' 
+                                                    : 'bg-white text-slate-500 border-slate-100 hover:border-orange-200'
+                                                }`}
+                                            >
+                                                {time}
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 bg-orange-50 text-orange-800 rounded-2xl text-center font-medium">
+                                        Bugün için tadım saati kalmadı. Yarın tekrar bekleriz!
+                                    </div>
+                                )}
                             </div>
 
-                            {statusMessage && <p className="text-red-500 text-center text-sm font-bold">{statusMessage}</p>}
+                            {statusMessage && (
+                                <div className="p-3 bg-red-50 text-red-600 text-center text-sm font-bold rounded-xl border border-red-100">
+                                    {statusMessage}
+                                </div>
+                            )}
 
                             <button 
                                 onClick={handleOrder}
-                                disabled={!selectedTime || isOrdering}
+                                disabled={!selectedTime || isOrdering || timeSlots.length === 0}
                                 className={`w-full py-5 text-white font-bold text-xl rounded-2xl transition-all shadow-lg transform active:scale-95 flex items-center justify-center gap-3 ${
                                     selectedTime && !isOrdering ? 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20' : 'bg-slate-200 text-slate-400'
                                 }`}
@@ -198,7 +228,7 @@
             return (
                 <div className="p-6 max-w-5xl mx-auto py-16 md:py-24">
                     <header className="mb-16 text-center space-y-4">
-                        <div className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-2">
+                        <div className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-black uppercase tracking-widest mb-2 animate-pulse">
                             Bilimevi Coffee Studio
                         </div>
                         <h1 className="text-5xl md:text-7xl font-serif font-black text-slate-900 tracking-tighter leading-none">
